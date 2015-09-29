@@ -15,10 +15,6 @@
 <script src="muur.js"></script>
 
 <script>
-
-var muurhoogte = 200;
-var muur_gerealiseerd = 49;
-
 var dikte = 5;
 
 var size = {
@@ -32,6 +28,11 @@ var size = {
         {dx:  10 + 1, w: 10,  name: 'kop-uitstekend'} // 4
     ]
 };
+
+var muurhoogte = 200;
+var lagen = muurhoogte / size.lagenmaat;
+var muur_gerealiseerd = 49;
+
 
 function halfsteens(breedte, lagen) {
     return d3.range(0, lagen).map(function (i) {
@@ -94,19 +95,37 @@ function randomize_koppen(muur) {
     });
 }
 
+function randomize_halfsteens(muur) {
+    return muur.map(function (row, i) {
+        // bestaande muur, niks aan doen
+        if (i < muur_gerealiseerd / size.lagenmaat) { return row; }
 
-// plot('Halfsteens', halfsteens(32, 34), size);
-// plot('Kruis', kruis(32, 34), size);
+        var num_protruding = 0;
+        for (var j = 0; j <= row.length; j++) {
+            var s = row[j];
+            if (s == 0 && num_protruding < 2 && is_protruding(i)) {
+                // vervang deze streksteen met twee kopse waarvan 1 uitstekend.
+                if (Math.random() < 0.5) {
+                    row.splice(j, 1, 1, 4);
+                } else {
+                    row.splice(j, 1, 4, 1);
+                }
+                num_protruding++;
+                continue;
+            }
+            num_protruding = 0;
+        }
+        return row;
+    });
+}
 
-var dist = d3.range(0, 1, 0.01).map(function (i) {
-    return [i, 40 + Math.sqrt(i) * 400];
-});
+plot('randomized halfsteens', randomize_halfsteens(halfsteens(32, lagen)), size);
 
-var muur = kruis(32, 200 / size.lagenmaat);
+var muur = kruis(32, lagen);
 muur = randomize_koppen(muur);
 plot('randomized kruisverband', muur, size);
 
-muur = super_random(60, 200 / size.lagenmaat);
+muur = super_random(60, lagen);
 muur = randomize_koppen(muur);
 plot('randomized wildverband', muur, size);
 

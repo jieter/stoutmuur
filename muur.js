@@ -2,8 +2,8 @@ var container = d3.select('body');
 
 var margin = {
     left: 30,
-    right: 20,
-    top: 20,
+    right: 10,
+    top: 0,
     bottom: 40
 };
 // var width = function () { return container.offsetWidth; };
