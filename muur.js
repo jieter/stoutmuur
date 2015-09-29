@@ -7,7 +7,7 @@ var margin = {
     bottom: 40
 };
 // var width = function () { return container.offsetWidth; };
-var outerWidth = function () { return 1500; };
+var outerWidth = function () { return 1200; };
 var width = function () { return outerWidth() - margin.left - margin.right; };
 var outerHeight = Math.floor(outerWidth() * (2 / 7));
 var height = outerHeight - margin.top - margin.bottom;
