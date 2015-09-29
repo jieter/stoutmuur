@@ -70,11 +70,11 @@ var super_random = function (breedte, lagen) {
 function is_protruding(laag) {
     var hoogte = laag * size.lagenmaat;
     var normalized = (hoogte - muur_gerealiseerd) / (muurhoogte - muur_gerealiseerd);
-    console.log(laag, hoogte, normalized);
+
     if (hoogte < muur_gerealiseerd) {
         return true;
     }
-    return Math.random() < (normalized + 0.15) / 4;
+    return Math.random() < (normalized + 0.10) / 4;
 }
 
 function randomize_koppen(muur) {
@@ -82,12 +82,14 @@ function randomize_koppen(muur) {
         // bestaande muur, niks aan doen
         if (i < muur_gerealiseerd / size.lagenmaat) { return row; }
 
+        var num_protruding = 0;
         return row.map(function (s) {
-            if (s == 1&& is_protruding(i)) {
+            if (s == 1 && num_protruding < 2 && is_protruding(i)) {
+                num_protruding++;
                 return 4;
-            } else {
-                return s;
             }
+            num_protruding = 0;
+            return s;
         });
     });
 }
