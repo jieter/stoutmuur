@@ -16,20 +16,24 @@
 
 <script>
 
+var muurhoogte = 200;
+var muur_gerealiseerd = 49;
+
 var dikte = 5;
 
 var size = {
     dikte: dikte,
     lagenmaat: dikte + 1,
     stones: [
-        {dx: 21 + 1, w: 21}, // strek
-        {dx: 10 + 1, w: 10}, // kop
-        {dx:  4.5 + 1, w: 4.5 }, // halve kop
-        {dx: 15 + 1, w: 15}  // drieklezor
+        {dx:  21 + 1, w: 21,  name: 'strek'}, // 0
+        {dx:  10 + 1, w: 10,  name: 'kop'}, // 1
+        {dx: 4.5 + 1, w: 4.5, name: 'klisklezoor'}, // 2
+        {dx:  15 + 1, w: 15,  name: 'drieklezor'}, // 3
+        {dx:  10 + 1, w: 10,  name: 'kop-uitstekend'} // 4
     ]
 };
 
-var halfsteens = function (breedte, lagen) {
+function halfsteens(breedte, lagen) {
     return d3.range(0, lagen).map(function (i) {
         var laag = d3.range(0, breedte - 1).map(function () { return 0; });
         if (i % 2 == 0) {
@@ -39,7 +43,7 @@ var halfsteens = function (breedte, lagen) {
         }
         return laag;
     });
-};
+}
 
 var kruis = function (breedte, lagen) {
     return d3.range(0, lagen).map(function (i) {
@@ -50,10 +54,56 @@ var kruis = function (breedte, lagen) {
         }
     });
 };
+var rand = function (a, b) { return Math.floor(Math.random() * b + 1) - 1; };
 
 
-plot('Halfsteens', halfsteens(32, 34), size);
-plot('Kruis', kruis(32, 34), size);
+var super_random = function (breedte, lagen) {
+    return d3.range(0, lagen).map(function (i) {
+        var laag = d3.range(0, breedte).map(function (j) { return rand(0, 2); });
+        if (i % 2 == 0) {
+            laag.unshift(2);
+        }
+        return laag;
+    });
+};
+
+function is_protruding(laag) {
+    var hoogte = laag * size.lagenmaat;
+    var normalized = (hoogte - muur_gerealiseerd) / (muurhoogte - muur_gerealiseerd);
+    console.log(laag, hoogte, normalized);
+    if (hoogte < muur_gerealiseerd) {
+        return true;
+    }
+    return Math.random() < (normalized + 0.15) / 4;
+}
+
+function randomize_koppen(muur) {
+    return muur.map(function (row, i) {
+        // bestaande muur, niks aan doen
+        if (i < muur_gerealiseerd / size.lagenmaat) { return row; }
+
+        return row.map(function (s) {
+            if (s == 1&& is_protruding(i)) {
+                return 4;
+            } else {
+                return s;
+            }
+        });
+    });
+}
+
+
+// plot('Halfsteens', halfsteens(32, 34), size);
+// plot('Kruis', kruis(32, 34), size);
+
+var dist = d3.range(0, 1, 0.01).map(function (i) {
+    return [i, 40 + Math.sqrt(i) * 400];
+});
+
+var muur = kruis(32, 200 / size.lagenmaat);
+
+muur = randomize_koppen(muur);
+plot('random', muur, size);
 
 
 

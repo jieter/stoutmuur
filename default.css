@@ -5,10 +5,20 @@ body {
 .axis path,
 .axis line {
     fill: none;
-    stroke: #000;
+    stroke: black;
     shape-rendering: crispEdges;
 }
 
-.brick {
-    fill: GoldenRod;
+.brick.strek, .brick.kop, .brick.klisklezoor {
+    fill: #C16D57;
 }
+
+.brick.kop-uitstekend {
+    fill: #7c3320;
+}
+
+.plot {
+    stroke: purple;
+    fill: none;
+}
+
