@@ -1,7 +1,7 @@
 var container = d3.select('body');
 
 var margin = {
-    left: 20,
+    left: 30,
     right: 20,
     top: 20,
     bottom: 40
@@ -13,7 +13,7 @@ var outerHeight = Math.floor(outerWidth() * (2 / 7));
 var height = outerHeight - margin.top - margin.bottom;
 
 
-function plot(naam, muur, size, distribution) {
+function plot(naam, muur, size) {
     d3.select('body').append('h2').text(naam);
     var svg = container.append('svg').attr({
         width: outerWidth(),
@@ -21,21 +21,17 @@ function plot(naam, muur, size, distribution) {
     })
 
     var wall = svg.append('g').attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-    var distr = svg.append('g').attr('transform', 'translate(10, ' + margin.top + ')');
 
     var x = d3.scale.linear().range([width(), 0]);
     var y = d3.scale.linear().range([10, height]);
-    // var rx = d3.scale.linear().range([60, 0]);
 
     var axis = {
         x: d3.svg.axis().scale(x).orient('bottom'),
         y: d3.svg.axis().scale(y).orient('left')
-        // rx: d3.svg.axis().scale(rx).orient('bottom').ticks(3)
     }
 
     x.domain([700, 0]);
     y.domain([205, 0]);
-    // rx.domain([0.4, 0]);
 
     function transform (input) {
         var out = [];
@@ -95,9 +91,4 @@ function plot(naam, muur, size, distribution) {
         );
     };
 
-    var sel = distr.selectAll('.plot').data([distribution]);
-
-    // console.log(distribution);
-    // sel.enter()
-    //     .append('path').attr('class', 'plot').call(line);
 }
