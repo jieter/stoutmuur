@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Stoutmuur</title>
+    <link rel="stylesheet" href="default.css">
+</head>
+
+<body>
+<a href="https://nl.wikipedia.org/wiki/Verband_(bouwkunde)">Wikipedia: verband</a>
+
+</body>
+
+<script src="http://d3js.org/d3.v3.js"></script>
+<script src="muur.js"></script>
+
+<script>
+
+var dikte = 5;
+
+var size = {
+    dikte: dikte,
+    lagenmaat: dikte + 1,
+    stones: [
+        {dx: 21 + 1, w: 21}, // strek
+        {dx: 10 + 1, w: 10}, // kop
+        {dx:  4.5 + 1, w: 4.5 }, // halve kop
+        {dx: 15 + 1, w: 15}  // drieklezor
+    ]
+};
+
+var halfsteens = function (breedte, lagen) {
+    return d3.range(0, lagen).map(function (i) {
+        var laag = d3.range(0, breedte - 1).map(function () { return 0; });
+        if (i % 2 == 0) {
+            laag.unshift(1);
+        } else {
+            laag.push(1);
+        }
+        return laag;
+    });
+};
+
+var kruis = function (breedte, lagen) {
+    return d3.range(0, lagen).map(function (i) {
+        if (i % 2 == 0) {
+            return d3.range(0, breedte * 2 - 1).map(function () { return 1; });
+        } else {
+            return [2].concat(d3.range(0, breedte - 1).map(function () { return 0; })).concat([2]);
+        }
+    });
+};
+
+
+plot('Halfsteens', halfsteens(32, 34), size);
+plot('Kruis', kruis(32, 34), size);
+
+
+
+
+
+
+
+</script>
+</html>
