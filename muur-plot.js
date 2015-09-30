@@ -7,8 +7,12 @@ var margin = {
     bottom: 40
 };
 // var width = function () { return container.offsetWidth; };
-var containerWidth = function () { return document.querySelector('body').offsetWidth; };
-var width = function () { return containerWidth() - margin.left - margin.right; };
+var containerWidth = function () {
+    return Math.max(800, document.querySelector('body').offsetWidth);
+};
+var width = function () {
+    return containerWidth() - margin.left - margin.right;
+};
 
 
 function plot(naam, size) {
