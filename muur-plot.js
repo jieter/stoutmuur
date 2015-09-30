@@ -80,6 +80,7 @@ function plot(naam, size) {
     var bricks = wall.append('g').attr('class', 'bricks');
 
     var Plot = function () {};
+
     Plot.render = function (data) {
         data = transform(data);
 
@@ -90,6 +91,7 @@ function plot(naam, size) {
 
         selection.call(brick);
     };
+
     Plot.resize = function () {
         svg.attr({
             width: containerWidth(),
