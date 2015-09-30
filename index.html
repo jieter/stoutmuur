@@ -7,8 +7,7 @@
 </head>
 
 <body>
-<a href="https://nl.wikipedia.org/wiki/Verband_(bouwkunde)">Wikipedia: verband</a>
-
+<button>Vernieuwen</button>
 </body>
 
 <script src="http://d3js.org/d3.v3.js"></script>
@@ -17,15 +16,17 @@
 <script>
 var dikte = 5;
 
+var strek = 0, kop = 1, drieklezoor = 3, uitstekend = 4;
+
 var size = {
     dikte: dikte,
     lagenmaat: dikte + 1,
     stones: [
-        {dx:  21 + 1, w: 21,  name: 'strek'}, // 0
-        {dx:  10 + 1, w: 10,  name: 'kop'}, // 1
-        {dx: 4.5 + 1, w: 4.5, name: 'klisklezoor'}, // 2
-        {dx:  15 + 1, w: 15,  name: 'drieklezor'}, // 3
-        {dx:  10 + 1, w: 10,  name: 'kop-uitstekend'} // 4
+        {dx:   21 + 1, w:   21, name: 'strek'}, // 0
+        {dx:   10 + 1, w:   10, name: 'kop'}, // 1
+        {dx:  4.5 + 1, w:  4.5, name: 'klisklezoor'}, // 2
+        {dx: 15.5 + 1, w: 15.5, name: 'drieklezoor'}, // 3
+        {dx:   10 + 1, w:   10, name: 'kop-uitstekend'} // 4
     ]
 };
 
@@ -96,9 +97,10 @@ function randomize_koppen(muur) {
 }
 
 function randomize_halfsteens(muur) {
-    return muur.map(function (row, i) {
+    for (var i = 0; i < muur.length; i++) {
+        var row = muur[i];
         // bestaande muur, niks aan doen
-        if (i < muur_gerealiseerd / size.lagenmaat) { return row; }
+        if (i < muur_gerealiseerd / size.lagenmaat) { continue; }
 
         var num_protruding = 0;
         for (var j = 0; j <= row.length; j++) {
@@ -106,28 +108,27 @@ function randomize_halfsteens(muur) {
             if (s == 0 && num_protruding < 2 && is_protruding(i)) {
                 // vervang deze streksteen met twee kopse waarvan 1 uitstekend.
                 if (Math.random() < 0.5) {
-                    row.splice(j, 1, 1, 4);
+                    muur[i].splice(j, 1, kop, uitstekend);
                 } else {
-                    row.splice(j, 1, 4, 1);
+                    muur[i].splice(j, 1, uitstekend, kop);
                 }
                 num_protruding++;
                 continue;
             }
             num_protruding = 0;
         }
-        return row;
-    });
+    }
+    return muur;
 }
+var p = plot('randomized halfsteens', size);
 
-plot('randomized halfsteens', randomize_halfsteens(halfsteens(32, lagen)), size);
+var genereer = function () {
+    p.render(randomize_halfsteens(halfsteens(32, lagen)));
+};
 
-var muur = kruis(32, lagen);
-muur = randomize_koppen(muur);
-plot('randomized kruisverband', muur, size);
+genereer();
 
-muur = super_random(60, lagen);
-muur = randomize_koppen(muur);
-plot('randomized wildverband', muur, size);
+d3.select('button').on('click', genereer);
 
 
 

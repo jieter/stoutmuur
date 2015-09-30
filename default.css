@@ -9,7 +9,7 @@ body {
     shape-rendering: crispEdges;
 }
 
-.brick.strek, .brick.kop, .brick.klisklezoor {
+.brick.strek, .brick.kop, .brick.drieklezoor, .brick.klisklezoor {
     fill: #C16D57;
 }
 
