@@ -1,95 +1,145 @@
-var container = d3.select('body');
 
-var margin = {
-    left: 30,
-    right: 10,
-    top: 0,
-    bottom: 40
+var size = {
+    breedte: 610,
+    hoogte: 205,
+    gerealiseerd: 49,
+
+    dikte: 5,
+    lagenmaat: 5 + 1,
+    stones: [
+        {lengte:    1, dx:   21 + 1, w:   21, name: 'strek'}, // 0
+        {lengte:  0.5, dx:   10 + 1, w:   10, name: 'kop'}, // 1
+        {lengte: 0.25, dx:  4.5 + 1, w:  4.5, name: 'klisklezoor'}, // 2
+        {lengte: 0.75, dx: 15.5 + 1, w: 15.5, name: 'drieklezoor'}, // 3
+        {lengte:    1, dx:   10 + 1, w:   10, name: 'uitstekend'} // 4
+    ]
 };
-// var width = function () { return container.offsetWidth; };
-var outerWidth = function () { return 1200; };
-var width = function () { return outerWidth() - margin.left - margin.right; };
-var outerHeight = Math.floor(outerWidth() * (2 / 7));
-var height = outerHeight - margin.top - margin.bottom;
+var stones = {};
+size.stones.forEach(function (stone, i) {
+    stones[stone.name] = i;
+});
 
+var lagen = size.hoogte / size.lagenmaat;
+var lengtes = size.breedte / 21 + 1;
 
-function plot(naam, size) {
-    d3.select('body').append('h2').text(naam);
-    var svg = container.append('svg').attr({
-        width: outerWidth(),
-        height: outerHeight
-    })
+function rand(a, b) {
+    return Math.floor(Math.random() * b + 1) - 1;
+}
 
-    var wall = svg.append('g').attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+var verbanden = {
+    halfsteens: function (breedte, lagen) {
+        return d3.range(0, lagen).map(function (i) {
+            var laag = d3.range(0, breedte - 1).map(function () { return stones.strek; });
+            if (i % 2 == 0) {
+                laag.unshift(stones.kop);
+            } else {
+                laag.push(stones.kop);
+            }
+            return laag;
+        });
+    },
 
-    var x = d3.scale.linear().range([width(), 0]);
-    var y = d3.scale.linear().range([10, height]);
+    kruis: function (breedte, lagen) {
+        return d3.range(0, lagen).map(function (i) {
+            if (i % 2 == 0) {
+                return d3.range(0, breedte * 2 - 1).map(function () { return stones.kop; });
+            } else {
+                return [stones.klisklezoor].concat(
+                    d3.range(0, breedte - 1).map(function () { return stones.strek; })
+                ).concat([stones.klisklezoor]);
+            }
+        });
+    },
 
-    var axis = {
-        x: d3.svg.axis().scale(x).orient('bottom'),
-        y: d3.svg.axis().scale(y).orient('left')
+    random: function (breedte, lagen) {
+        return d3.range(0, lagen).map(function (i) {
+            var laag = d3.range(0, breedte).map(function () { return rand(0, 2); });
+            if (i % 2 == 0) {
+                laag.unshift(stones.klisklezoor);
+            }
+            return laag;
+        });
+    }
+};
+
+function is_protruding(laag) {
+    var hoogte = laag * size.lagenmaat;
+    var normalized = (hoogte - size.gerealiseerd) / (size.hoogte - size.gerealiseerd);
+
+    if (hoogte < size.gerealiseerd) {
+        return true;
+    }
+    return Math.random() < (normalized + 0.10) / 4;
+}
+
+var laag_breedte = function (row, index) {
+    var ret = 0;
+    for (var i = 0; i < index; i++) {
+        ret += size.stones[row[i]].lengte;
     }
 
-    x.domain([700, 0]);
-    y.domain([205, 0]);
+    return ret;
+};
 
-    function transform (input) {
-        var out = [];
+var randomizers = {
+    koppen: function (muur) {
+        return muur.map(function (row, i) {
+            // bestaande muur, niks aan doen
+            if (i < size.gerealiseerd / size.lagenmaat) { return row; }
 
-        input.forEach(function (row, rowid) {
-            var rowY = size.dikte + rowid * (size.lagenmaat);
-            var rowX = 0;
-            row.forEach(function (b) {
-                var s = size.stones[b];
-
-                out.push({
-                    x: rowX,
-                    y: rowY,
-                    width: s.w,
-                    class: s.name
-                });
-                rowX += s.dx;
+            var num_protruding = 0;
+            return row.map(function (s) {
+                if (s == stones.kop && num_protruding < 2 && is_protruding(i)) {
+                    num_protruding++;
+                    return stones.uitstekend;
+                }
+                num_protruding = 0;
+                return s;
             });
         });
+    },
+    halfsteens: function (muur) {
+        var row, strekken;
+        for (var i = 0; i < muur.length; i++) {
+            // bestaande muur, niks aan doen
+            if (i < size.gerealiseerd / size.lagenmaat) { continue; }
 
-        return out;
-    }
+            row = muur[i];
 
-    var graph_hoogte = height - y(size.dikte);
+            // initialize at 2 to allow replacements in first two strekken.
+            strekken = 2;
 
-    var brick = function (selection) {
-        selection.attr({
-            class: function (d) { return 'brick ' + d.class; },
-            x: function (d) { return x(d.x); },
-            y: function (d) { return y(d.y); },
-            width: function (d) { return x(d.width); },
-            height: function (d) { return graph_hoogte; }
-        });
-    };
+            for (var j = 0; j <= row.length; j++) {
+                var s = row[j];
+                if (s == stones.strek && strekken > 1 && is_protruding(i)) {
+                    // kijk omlaag om te zien of daar op deze index een
+                    // uitsteker zit.
 
-    for (var key in axis) {
-        var el = wall.append('g').attr('class', 'axis ' + key).call(axis[key]);
-        if (key == 'x' || key == 'rx') {
-            el.attr('transform', 'translate(0, ' + height + ')')
+                    // vervang deze streksteen met twee kopse waarvan 1 uitstekend.
+                    if (Math.random() < 0.5) {
+                        muur[i].splice(j, 1, stones.kop, stones.uitstekend);
+                    } else {
+                        muur[i].splice(j, 1, stones.uitstekend, stones.kop);
+                    }
+                    strekken = 0;
+                } else {
+                    strekken++;
+                }
+            }
         }
+        return muur;
     }
+};
 
-    var bricks = wall.append('g').attr('class', 'bricks');
+var p = plot('randomized halfsteens', size);
 
-    var Plot = function () {};
-    Plot.render = function (data) {
-        data = transform(data);
+var genereer = function () {
+    p.render(randomizers.halfsteens(verbanden.halfsteens(lengtes - 3, lagen)));
+};
 
-        var selection = bricks.selectAll('.brick').data(data);
+genereer();
 
-        selection.enter().append('rect');
-        selection.exit().remove();
-
-        selection.call(brick);
-    };
-    Plot.resize = function () {
-
-    };
-    return Plot;
-
-}
+d3.select('button').on('click', genereer);
+d3.select(window).on('resize', function () {
+    p.resize();
+});
