@@ -6,5 +6,6 @@ This is a small d3 script to visualize such a wall.
 
  - http://www.metselen.net/
  - https://nl.wikipedia.org/wiki/Verband_(bouwkunde)
+ - https://nl.wikipedia.org/wiki/Lijst_van_baksteenformaten
 
 ![](screenshot.png)
