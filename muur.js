@@ -11,7 +11,7 @@ var size = {
         {lengte:  0.5, dx:   10 + 1, w:   10, name: 'kop'}, // 1
         {lengte: 0.25, dx:  4.5 + 1, w:  4.5, name: 'klisklezoor'}, // 2
         {lengte: 0.75, dx: 15.5 + 1, w: 15.5, name: 'drieklezoor'}, // 3
-        {lengte:    1, dx:   10 + 1, w:   10, name: 'uitstekend'} // 4
+        {lengte:  0.5, dx:   10 + 1, w:   10, name: 'uitstekend'} // 4
     ]
 };
 var stones = {};
@@ -74,10 +74,10 @@ function is_protruding(laag) {
 
 var laag_breedte = function (row, index) {
     var ret = 0;
-    for (var i = 0; i < index; i++) {
+    var limit = index || row.length;
+    for (var i = 0; i < limit; i++) {
         ret += size.stones[row[i]].lengte;
     }
-
     return ret;
 };
 
@@ -134,7 +134,8 @@ var randomizers = {
 var p = plot('randomized halfsteens', size);
 
 var genereer = function () {
-    p.render(randomizers.halfsteens(verbanden.halfsteens(lengtes - 3, lagen)));
+    var data = randomizers.halfsteens(verbanden.halfsteens(lengtes - 3, lagen));
+    p.render(data);
 };
 
 genereer();
