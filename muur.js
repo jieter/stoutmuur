@@ -80,6 +80,15 @@ var laag_breedte = function (row, index) {
     }
     return ret;
 };
+// reverse of laag_breedte
+var stone_at = function (row, x) {
+    for (var i = 0; i < row.length; i++) {
+        if (x <= 0) {
+            return row[i];
+        }
+        x -= size.stones[row[i]].lengte;
+    }
+};
 
 var randomizers = {
     koppen: function (muur) {
@@ -114,6 +123,12 @@ var randomizers = {
                 if (s == stones.strek && strekken > 1 && is_protruding(i)) {
                     // kijk omlaag om te zien of daar op deze index een
                     // uitsteker zit.
+                    var x = laag_breedte(row, j);
+
+                    if (stone_at(muur[i - 1], x) == stones.uitstekend) {
+                        // below is uitstekend, skip.
+                        continue;
+                    }
 
                     // vervang deze streksteen met twee kopse waarvan 1 uitstekend.
                     if (Math.random() < 0.5) {
@@ -133,14 +148,18 @@ var randomizers = {
 
 var p = plot('randomized halfsteens', size);
 
-var genereer = function () {
+var generate_wall = function () {
     var data = randomizers.halfsteens(verbanden.halfsteens(lengtes - 3, lagen));
     p.render(data);
+
+    // data.forEach(function (row, i) {
+    //     console.log(stone_at(row, 0), stone_at(row, 0.5), stone_at(row, 1), row);
+    // });
 };
 
-genereer();
+generate_wall();
 
-d3.select('button').on('click', genereer);
+d3.select('button').on('click', generate_wall);
 d3.select(window).on('resize', function () {
     p.resize();
 });

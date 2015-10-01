@@ -14,7 +14,7 @@ var width = function () {
     return containerWidth() - margin.left - margin.right;
 };
 
-
+/* exported plot */
 function plot(naam, size) {
     var containerHeight = function () {
         return Math.floor(containerWidth() * (size.hoogte / size.breedte));
