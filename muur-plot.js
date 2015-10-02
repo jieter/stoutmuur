@@ -16,11 +16,15 @@ var width = function () {
 
 /* exported plot */
 function plot(naam, size) {
+    var Plot = function () {};
+    Plot.size = size;
+
     var containerHeight = function () {
-        return Math.floor(containerWidth() * (size.hoogte / size.breedte));
+        var height = Math.floor(containerWidth() * (Plot.size.hoogte / Plot.size.breedte));
+        return Math.max(250, height);
     };
     var height = function () {
-        return containerHeight()- margin.top - margin.bottom;
+        return containerHeight() - margin.top - margin.bottom;
     };
 
     d3.select('body').append('h2').text(naam);
@@ -39,17 +43,15 @@ function plot(naam, size) {
         y: d3.svg.axis().scale(y).orient('left')
     };
 
-    x.domain([size.breedte, 0]);
-    y.domain([size.hoogte, 0]);
 
-    function transform (input) {
+    Plot.transform = function transform (input) {
         var out = [];
 
         input.forEach(function (row, rowid) {
-            var rowY = size.dikte + rowid * (size.lagenmaat);
+            var rowY = Plot.size.dikte + rowid * (Plot.size.lagenmaat);
             var rowX = 0;
             row.forEach(function (b) {
-                var s = size.stones[b];
+                var s = Plot.size.stones[b];
 
                 out.push({
                     x: rowX,
@@ -70,7 +72,7 @@ function plot(naam, size) {
             x: function (d) { return x(d.x); },
             y: function (d) { return y(d.y); },
             width: function (d) { return x(d.width); },
-            height: function () { return height() - y(size.dikte); }
+            height: function () { return height() - y(Plot.size.dikte); }
         });
     };
 
@@ -83,10 +85,18 @@ function plot(naam, size) {
 
     var bricks = wall.append('g').attr('class', 'bricks');
 
-    var Plot = function () {};
-
     Plot.render = function (data) {
-        data = transform(data);
+        x.domain([Plot.size.breedte, 0]);
+        y.domain([Plot.size.hoogte, 0]);
+
+        for (var key in axis) {
+            var el = wall.select('.axis.' + key).call(axis[key]);
+            if (key == 'x') {
+                el.attr('transform', 'translate(0, ' + height() + ')');
+            }
+        }
+
+        data = this.transform(data);
 
         var selection = bricks.selectAll('.brick').data(data);
 
@@ -112,6 +122,11 @@ function plot(naam, size) {
         }
 
         bricks.selectAll('.brick').call(brick);
+    };
+    Plot.updateSize = function (size) {
+        this.size = size;
+        this.resize();
+
     };
     return Plot;
 }

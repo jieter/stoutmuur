@@ -1,6 +1,6 @@
 
 var size = {
-    breedte: 610,
+    breedte: 600,
     hoogte: 205,
     gerealiseerd: 49,
 
@@ -18,9 +18,6 @@ var stones = {};
 size.stones.forEach(function (stone, i) {
     stones[stone.name] = i;
 });
-
-var lagen = size.hoogte / size.lagenmaat;
-var lengtes = size.breedte / 21 + 1;
 
 function rand(a, b) {
     return Math.floor(Math.random() * b + 1) - 1;
@@ -148,18 +145,29 @@ var randomizers = {
 
 var p = plot('randomized halfsteens', size);
 
+var data;
 var generate_wall = function () {
-    var data = randomizers.halfsteens(verbanden.halfsteens(lengtes - 3, lagen));
-    p.render(data);
+    var breedte = +d3.select('#width').node().value;
+    var hoogte = +d3.select('#height').node().value;
+    if (breedte > 0 && hoogte > 0) {
+        size.breedte = breedte;
+        size.hoogte = hoogte;
+        p.updateSize(size);
 
-    // data.forEach(function (row, i) {
-    //     console.log(stone_at(row, 0), stone_at(row, 0.5), stone_at(row, 1), row);
-    // });
+    }
+
+    var lagen = size.hoogte / size.lagenmaat;
+    var lengtes = size.breedte / 21 + 1;
+
+    data = randomizers.halfsteens(verbanden.halfsteens(lengtes - 3, lagen));
+    p.render(data);
 };
 
 generate_wall();
 
 d3.select('button').on('click', generate_wall);
+d3.select('input').on('change', generate_wall);
+
 d3.select(window).on('resize', function () {
     p.resize();
 });
