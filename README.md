@@ -9,3 +9,4 @@ This is a small d3 script to visualize such a wall.
  - https://nl.wikipedia.org/wiki/Lijst_van_baksteenformaten
 
 ![](screenshot.png)
+![](muur.jpg)
